@@ -1,0 +1,12 @@
+[
+    "point_clouds/all_-1_1_train_ds02.txt",
+    {
+        "type":"filters.optimalneighborhood",
+        "min_k":8,
+        "max_k": 50
+    },
+    {
+        "type":"writers.text",
+        "filename":"point_clouds/all_-1_1_train_ds02_optimalneighborhood.txt"
+    }
+]

@@ -1,0 +1,9 @@
+[
+    "point_clouds/all_-1_1_train.txt",
+    {
+        "type":"filters.voxeldownsize",
+        "cell":0.2,
+        "mode":"center"
+    },
+    "point_clouds/all_-1_1_train_ds02.txt"
+]

@@ -1,0 +1,13 @@
+[
+    "point_clouds/all_-1_1_train_ds02_optimalneighborhood_cleaned.txt",
+    {
+        "type":"filters.covariancefeatures",
+        "threads": 20,
+        "optimized":true,
+        "feature_set": "Linearity,Planarity,EigenvalueSum,Verticality,SurfaceVariation"
+    },
+    {
+        "type":"writers.text",
+        "filename":"point_clouds/all_-1_1_train_ds02_optimalneighborhood_cleaned_featured.txt"
+    }
+]
