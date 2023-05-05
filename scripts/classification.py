@@ -1,12 +1,13 @@
+import time
 import pandas as pd
 import sklearn as sk
 from sklearn.preprocessing import normalize
-from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
 from xgboost import XGBClassifier
 
-df = pd.read_csv('../point_clouds/all_-1_1_train_ds02_optimalneighborhood_cleaned_featured.txt')
-print("all_-1_1_train_ds02_optimalneighborhood_cleaned.txt")
+df = pd.read_csv('../point_clouds/all_-1_1_generalized_train_ds02_optimalneighborhood_cleaned_featured.txt')
+print("all_-1_1_generalized_train_ds02_optimalneighborhood_cleaned.txt")
 print(df.head())
 
 # "X","Y","Z","Classification","Intensity","OptimalKNN","OptimalRadius","Linearity","Planarity","EigenvalueSum","Verticality","SurfaceVariation"
@@ -73,11 +74,24 @@ labels = df.columns[4:]
 X = df[labels]
 print(X)
 y = df["Classification"]
+le = LabelEncoder()
+y = le.fit_transform(y)
 print(y)
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1)
 
+start_time = time.time()
+
 model = XGBClassifier()
 model.fit(X_train, y_train)
 y_pred = model.predict(X_test)
+
+print("Accuracy: " + str(sk.metrics.accuracy_score(y_test, y_pred)))
+print("Precision: " + str(sk.metrics.precision_score(y_test, y_pred, average='macro')))
+print("Recall: " + str(sk.metrics.recall_score(y_test, y_pred, average='macro')))
+print("F1: " + str(sk.metrics.f1_score(y_test, y_pred, average='macro')))
+print("Confusion Matrix: \n" + str(sk.metrics.confusion_matrix(y_test, y_pred)))
+
+# print out the time it took to run the script
+print("--- %s seconds ---" % (time.time() - start_time))
 
