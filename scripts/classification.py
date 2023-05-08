@@ -91,7 +91,7 @@ eval_set = [(X_test, y_test)]
 if read_model:
     model.load_model('../models/' + model_name)
 else:
-    model.fit(X_train, y_train, early_stopping_rounds=10, eval_metric="logloss", eval_set=eval_set, verbose=True)
+    model.fit(X_train, y_train, early_stopping_rounds=10, verbose=True)
 
 y_pred = model.predict(X_test)
 
