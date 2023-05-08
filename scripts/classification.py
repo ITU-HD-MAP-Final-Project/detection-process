@@ -4,7 +4,7 @@ import sklearn as sk
 from sklearn.preprocessing import normalize
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
-from xgboost import XGBClassifier
+from xgboost.sklearn import XGBClassifier
 
 # params
 read_model = False
@@ -86,12 +86,12 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 
 start_time = time.time()
 
-model = XGBClassifier()
 eval_set = [(X_test, y_test)]
+model = XGBClassifier()
 if read_model:
     model.load_model('../models/' + model_name)
 else:
-    model.fit(X_train, y_train, early_stopping_rounds=10, verbose=True)
+    model.fit(X_train, y_train, early_stopping_rounds=10, eval_set=eval_set, verbose=True)
 
 y_pred = model.predict(X_test)
 
