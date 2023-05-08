@@ -6,6 +6,10 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from xgboost import XGBClassifier
 
+# params
+read_model = False
+model_name = ''
+
 df = pd.read_csv('../point_clouds/all_-1_1_generalized_train_ds02_optimalneighborhood_cleaned_featured.txt')
 print("all_-1_1_generalized_train_ds02_optimalneighborhood_cleaned.txt")
 print(df.head())
@@ -83,7 +87,12 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 start_time = time.time()
 
 model = XGBClassifier()
-model.fit(X_train, y_train)
+eval_set = [(X_test, y_test)]
+if read_model:
+    model.load_model('../models/' + model_name)
+else:
+    model.fit(X_train, y_train, early_stopping_rounds=10, eval_metric="logloss", eval_set=eval_set, verbose=True)
+
 y_pred = model.predict(X_test)
 
 print("Accuracy: " + str(sk.metrics.accuracy_score(y_test, y_pred)))
@@ -94,4 +103,7 @@ print("Confusion Matrix: \n" + str(sk.metrics.confusion_matrix(y_test, y_pred)))
 
 # print out the time it took to run the script
 print("--- %s seconds ---" % (time.time() - start_time))
+
+# save the model
+model.save_model('../models/xgboost_model.txt')
 
