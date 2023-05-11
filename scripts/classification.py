@@ -1,10 +1,11 @@
 import time
+import joblib
 import pandas as pd
 import sklearn as sk
 from sklearn.preprocessing import normalize
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder
 from xgboost.sklearn import XGBClassifier
+from sklearn.ensemble import RandomForestClassifier
 
 # params
 read_model = False
@@ -12,7 +13,6 @@ model_name = ''
 
 df_train = pd.read_csv('../point_clouds/all_-1_1_train_ds02_optimalneighborhood_cleaned_featured.txt')
 df_test = pd.read_csv('../point_clouds/all_-1_1_test_ds02_optimalneighborhood_cleaned_featured.txt')
-
 
 # "X","Y","Z","Classification","Intensity","OptimalKNN","OptimalRadius","Linearity","Planarity","EigenvalueSum","Verticality","SurfaceVariation"
 train_mean_radius = df_train.loc[:, 'OptimalRadius'].mean()
@@ -73,6 +73,8 @@ df_train['Verticality'] = normalize(df_train[['Verticality']], axis=0)
 df_train['SurfaceVariation'] = normalize(df_train[['SurfaceVariation']], axis=0)
 print("------------------- \nnormalization is applied")
 
+
+# CREATE THE TRAINING SET
 labels = df_train.columns[4:]
 X = df_train[labels]
 print(X)
@@ -81,28 +83,40 @@ print(y)
 
 X_train, X_val, y_train, y_val= train_test_split(X, y, test_size=0.2, random_state=1)
 
-start_time = time.time()
 
+# XGBOOST
 eval_set = [(X_val, y_val)]
-model = XGBClassifier()
+xg = XGBClassifier()
 if read_model:
-    model.load_model('../models/' + model_name)
+    xg.load_model('../models/' + model_name)
 else:
-    model.fit(X_train, y_train, early_stopping_rounds=10, eval_set=eval_set, verbose=True)
+    start_time = time.time()
+    xg.fit(X_train, y_train, early_stopping_rounds=10, eval_set=eval_set, verbose=True)
+    print("--- %s seconds ---" % (time.time() - start_time))
 
-y_pred = model.predict(X_val)
+y_pred = xg.predict(X_val)
 
-print("Accuracy: " + str(sk.metrics.accuracy_score(y_val, y_pred)))
+print("Accuracy - Dependent Test: " + str(sk.metrics.accuracy_score(y_val, y_pred)))
 print("Precision: " + str(sk.metrics.precision_score(y_val, y_pred, average='macro')))
 print("Recall: " + str(sk.metrics.recall_score(y_val, y_pred, average='macro')))
 print("F1: " + str(sk.metrics.f1_score(y_val, y_pred, average='macro')))
 print("Confusion Matrix: \n" + str(sk.metrics.confusion_matrix(y_val, y_pred)))
 
-# print out the time it took to run the script
-print("--- %s seconds ---" % (time.time() - start_time))
+xg.save_model('../models/xgboost_model.txt')
 
-# save the model
-model.save_model('../models/xgboost_model.txt')
+
+# RANDOM FOREST
+rf = RandomForestClassifier(n_estimators=100, max_depth=2, random_state=0)
+rf.fit(X_train, y_train)
+y_pred = rf.predict(X_val)
+
+print("Accuracy: - Independent RF" + str(sk.metrics.accuracy_score(y_val, y_pred)))
+# print("Precision: " + str(sk.metrics.precision_score(y_val, y_pred, average='macro')))
+# print("Recall: " + str(sk.metrics.recall_score(y_val, y_pred, average='macro')))
+# print("F1: " + str(sk.metrics.f1_score(y_val, y_pred, average='macro')))
+# print("Confusion Matrix: \n" + str(sk.metrics.confusion_matrix(y_val, y_pred)))
+
+joblib.dump(rf, '../models/random_forest_model.joblib')
 
 
 
@@ -166,20 +180,36 @@ df_test['Verticality'] = normalize(df_test[['Verticality']], axis=0)
 df_test['SurfaceVariation'] = normalize(df_test[['SurfaceVariation']], axis=0)
 print("------------------- \nnormalization is applied")
 
+# create the test and validation data of the TEST AREA
 labels_TESTAREA = df_test.columns[4:]
 TESTAREA_test = df_test[labels_TESTAREA]
 print(TESTAREA_test)
 TESTAREA_val = df_test["Classification"]
 print(TESTAREA_val)
 
-y_pred_TESTAREA = model.predict(TESTAREA_test)
+# XGBOOST
+y_pred_TESTAREA_xg = xg.predict(TESTAREA_test)
 
-print("Accuracy: " + str(sk.metrics.accuracy_score(TESTAREA_val, y_pred_TESTAREA)))
-print("Precision: " + str(sk.metrics.precision_score(TESTAREA_val, y_pred_TESTAREA, average='macro')))
-print("Recall: " + str(sk.metrics.recall_score(TESTAREA_val, y_pred_TESTAREA, average='macro')))
-print("F1: " + str(sk.metrics.f1_score(TESTAREA_val, y_pred_TESTAREA, average='macro')))
-print("Confusion Matrix: \n" + str(sk.metrics.confusion_matrix(TESTAREA_val, y_pred_TESTAREA)))
+print("Accuracy - Independent XG: " + str(sk.metrics.accuracy_score(TESTAREA_val, y_pred_TESTAREA_xg)))
+# print("Precision: " + str(sk.metrics.precision_score(TESTAREA_val, y_pred_TESTAREA_xg, average='macro')))
+# print("Recall: " + str(sk.metrics.recall_score(TESTAREA_val, y_pred_TESTAREA_xg, average='macro')))
+# print("F1: " + str(sk.metrics.f1_score(TESTAREA_val, y_pred_TESTAREA_xg, average='macro')))
+# print("Confusion Matrix: \n" + str(sk.metrics.confusion_matrix(TESTAREA_val, y_pred_TESTAREA_xg)))
 
-df_predicted_class = pd.DataFrame({'Classification': y_pred_TESTAREA})
-df_test_result = pd.concat([df_test, df_predicted_class], axis=1)
-df_test_result.to_csv('../results/' + model_name + '.csv', index=False)
+df_predicted_class_xg = pd.DataFrame({'Classification': y_pred_TESTAREA_xg})
+df_test_result_xg = pd.concat([df_test, df_predicted_class_xg], axis=1)
+df_test_result_xg.to_csv('../results/xg_predicted.csv', index=False)
+
+
+# RANDOM FOREST
+y_pred_TESTAREA_rf = rf.predict(TESTAREA_test)
+
+print("Accuracy:  - Independent RF" + str(sk.metrics.accuracy_score(TESTAREA_val, y_pred_TESTAREA_rf)))
+# print("Precision: " + str(sk.metrics.precision_score(TESTAREA_val, y_pred_TESTAREA_rf, average='macro')))
+# print("Recall: " + str(sk.metrics.recall_score(TESTAREA_val, y_pred_TESTAREA_rf, average='macro')))
+# print("F1: " + str(sk.metrics.f1_score(TESTAREA_val, y_pred_TESTAREA_rf, average='macro')))
+# print("Confusion Matrix: \n" + str(sk.metrics.confusion_matrix(TESTAREA_val, y_pred_TESTAREA_rf)))
+
+df_predicted_class_rf = pd.DataFrame({'Classification': y_pred_TESTAREA_rf})
+df_test_result_rf = pd.concat([df_test, df_predicted_class_rf], axis=1)
+df_test_result_rf.to_csv('../results/rf_predicted.csv', index=False)
