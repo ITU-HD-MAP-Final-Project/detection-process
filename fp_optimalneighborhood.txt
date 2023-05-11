@@ -1,5 +1,5 @@
 [
-    "point_clouds/all_-1_1_generalized_train_ds02.txt",
+    "point_clouds/all_-1_1_test_ds02.txt",
     {
         "type":"filters.optimalneighborhood",
         "min_k":8,
@@ -7,6 +7,6 @@
     },
     {
         "type":"writers.text",
-        "filename":"point_clouds/all_-1_1_generalized_train_ds02_optimalneighborhood.txt"
+        "filename":"point_clouds/all_-1_1_test_ds02_optimalneighborhood.txt"
     }
 ]

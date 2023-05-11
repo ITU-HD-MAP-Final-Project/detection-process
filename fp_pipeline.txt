@@ -1,5 +1,5 @@
 [
-    "point_clouds/all_-1_1_generalized_train_ds02_optimalneighborhood_cleaned.txt",
+    "point_clouds/all_-1_1_test_ds02_optimalneighborhood_cleaned.txt",
     {
         "type":"filters.covariancefeatures",
         "threads": 20,
@@ -8,6 +8,6 @@
     },
     {
         "type":"writers.text",
-        "filename":"point_clouds/all_-1_1_generalized_train_ds02_optimalneighborhood_cleaned_featured.txt"
+        "filename":"point_clouds/all_-1_1_test_ds02_optimalneighborhood_cleaned_featured.txt"
     }
 ]

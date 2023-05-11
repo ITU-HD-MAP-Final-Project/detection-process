@@ -1,6 +1,6 @@
 import pandas as pd
 
-df = pd.read_csv('../point_clouds/all_-1_1_generalized_train_ds02_optimalneighborhood.txt')
+df = pd.read_csv('../point_clouds/all_-1_1_test_ds02_optimalneighborhood.txt')
 
 print(df.head())
 print("-------------------")
@@ -24,6 +24,6 @@ print("-------------------")
 print("OptimalRadius Counter: " + str(radius_counter))
 print("OptimalKNN Counter: " + str(knn_counter))
 
-df.to_csv("../point_clouds/all_-1_1_generalized_train_ds02_optimalneighborhood_cleaned.txt", index=False)
+df.to_csv("../point_clouds/all_-1_1_test_ds02_optimalneighborhood_cleaned.txt", index=False)
 
 
