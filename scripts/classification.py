@@ -3,6 +3,7 @@ import joblib
 import pandas as pd
 import sklearn as sk
 from sklearn.preprocessing import normalize
+from sklearn.utils import resample
 from sklearn.model_selection import train_test_split
 from xgboost.sklearn import XGBClassifier
 from sklearn.ensemble import RandomForestClassifier
@@ -74,13 +75,90 @@ df_train['SurfaceVariation'] = normalize(df_train[['SurfaceVariation']], axis=0)
 print("------------------- \nnormalization is applied")
 
 
+# SEPERATE THE CLASSES AND BALANCE THE DATASET
+df_train_0 = df_train[df_train.Classification == 0]
+df_train_1 = df_train[df_train.Classification == 1]
+df_train_2 = df_train[df_train.Classification == 2]
+df_train_3 = df_train[df_train.Classification == 3]
+df_train_4 = df_train[df_train.Classification == 4]
+df_train_5 = df_train[df_train.Classification == 5]
+df_train_6 = df_train[df_train.Classification == 6]
+df_train_7 = df_train[df_train.Classification == 7]
+df_train_8 = df_train[df_train.Classification == 8]
+df_train_9 = df_train[df_train.Classification == 9]
+df_train_10 = df_train[df_train.Classification == 10]
+df_train_11 = df_train[df_train.Classification == 11]
+df_train_12 = df_train[df_train.Classification == 12]
+df_train_13 = df_train[df_train.Classification == 13]
+df_train_14 = df_train[df_train.Classification == 14]
+
+df_train_1 = resample(df_train_1,
+             replace=True,
+             n_samples=len(df_train_0),
+             random_state=42)
+df_train_2 = resample(df_train_2,
+             replace=True,
+             n_samples=len(df_train_0),
+             random_state=42)
+df_train_3 = resample(df_train_3,
+             replace=True,
+             n_samples=len(df_train_0),
+             random_state=42)
+df_train_4 = resample(df_train_4,
+             replace=True,
+             n_samples=len(df_train_0),
+             random_state=42)
+df_train_5 = resample(df_train_5,
+             replace=True,
+             n_samples=len(df_train_0),
+             random_state=42)
+df_train_6 = resample(df_train_6,
+             replace=True,
+             n_samples=len(df_train_0),
+             random_state=42)
+df_train_7 = resample(df_train_7,
+             replace=True,
+             n_samples=len(df_train_0),
+             random_state=42)
+df_train_8 = resample(df_train_8,
+             replace=True,
+             n_samples=len(df_train_0),
+             random_state=42)
+df_train_9 = resample(df_train_9,
+             replace=True,
+             n_samples=len(df_train_0),
+             random_state=42)
+df_train_10 = resample(df_train_10,
+             replace=True,
+             n_samples=len(df_train_0),
+             random_state=42)
+df_train_11 = resample(df_train_11,
+             replace=True,
+             n_samples=len(df_train_0),
+             random_state=42)
+df_train_12 = resample(df_train_12,
+             replace=True,
+             n_samples=len(df_train_0),
+             random_state=42)
+df_train_13 = resample(df_train_13,
+             replace=True,
+             n_samples=len(df_train_0),
+             random_state=42)
+df_train_14 = resample(df_train_14,
+             replace=True,
+             n_samples=len(df_train_0),
+             random_state=42)
+
+df_train = pd.concat([df_train_0, df_train_1, df_train_2, df_train_3,
+                      df_train_4, df_train_5, df_train_6, df_train_7,
+                      df_train_8, df_train_9, df_train_10, df_train_11,
+                      df_train_12, df_train_13, df_train_14])
+
+
 # CREATE THE TRAINING SET
 labels = df_train.columns[4:]
 X = df_train[labels]
-print(X)
 y = df_train["Classification"]
-print(y)
-
 X_train, X_val, y_train, y_val= train_test_split(X, y, test_size=0.2, random_state=1)
 
 
@@ -96,11 +174,11 @@ else:
 
 y_pred = xg.predict(X_val)
 
-print("Accuracy - Dependent Test: " + str(sk.metrics.accuracy_score(y_val, y_pred)))
-print("Precision: " + str(sk.metrics.precision_score(y_val, y_pred, average='macro')))
-print("Recall: " + str(sk.metrics.recall_score(y_val, y_pred, average='macro')))
-print("F1: " + str(sk.metrics.f1_score(y_val, y_pred, average='macro')))
-print("Confusion Matrix: \n" + str(sk.metrics.confusion_matrix(y_val, y_pred)))
+print("Accuracy - Dependent Test XG: " + str(sk.metrics.accuracy_score(y_val, y_pred)))
+# print("Precision: " + str(sk.metrics.precision_score(y_val, y_pred, average='macro')))
+# print("Recall: " + str(sk.metrics.recall_score(y_val, y_pred, average='macro')))
+# print("F1: " + str(sk.metrics.f1_score(y_val, y_pred, average='macro')))
+# print("Confusion Matrix: \n" + str(sk.metrics.confusion_matrix(y_val, y_pred)))
 
 xg.save_model('../models/xgboost_model.txt')
 
@@ -110,7 +188,7 @@ rf = RandomForestClassifier(n_estimators=100, max_depth=2, random_state=0)
 rf.fit(X_train, y_train)
 y_pred = rf.predict(X_val)
 
-print("Accuracy: - Independent RF" + str(sk.metrics.accuracy_score(y_val, y_pred)))
+print("Accuracy: - Dependent Test RF" + str(sk.metrics.accuracy_score(y_val, y_pred)))
 # print("Precision: " + str(sk.metrics.precision_score(y_val, y_pred, average='macro')))
 # print("Recall: " + str(sk.metrics.recall_score(y_val, y_pred, average='macro')))
 # print("F1: " + str(sk.metrics.f1_score(y_val, y_pred, average='macro')))
@@ -190,7 +268,7 @@ print(TESTAREA_val)
 # XGBOOST
 y_pred_TESTAREA_xg = xg.predict(TESTAREA_test)
 
-print("Accuracy - Independent XG: " + str(sk.metrics.accuracy_score(TESTAREA_val, y_pred_TESTAREA_xg)))
+print("Accuracy - Independent Test XG: " + str(sk.metrics.accuracy_score(TESTAREA_val, y_pred_TESTAREA_xg)))
 # print("Precision: " + str(sk.metrics.precision_score(TESTAREA_val, y_pred_TESTAREA_xg, average='macro')))
 # print("Recall: " + str(sk.metrics.recall_score(TESTAREA_val, y_pred_TESTAREA_xg, average='macro')))
 # print("F1: " + str(sk.metrics.f1_score(TESTAREA_val, y_pred_TESTAREA_xg, average='macro')))
@@ -204,7 +282,7 @@ df_test_result_xg.to_csv('../results/xg_predicted.csv', index=False)
 # RANDOM FOREST
 y_pred_TESTAREA_rf = rf.predict(TESTAREA_test)
 
-print("Accuracy:  - Independent RF" + str(sk.metrics.accuracy_score(TESTAREA_val, y_pred_TESTAREA_rf)))
+print("Accuracy:  - Independent Test RF" + str(sk.metrics.accuracy_score(TESTAREA_val, y_pred_TESTAREA_rf)))
 # print("Precision: " + str(sk.metrics.precision_score(TESTAREA_val, y_pred_TESTAREA_rf, average='macro')))
 # print("Recall: " + str(sk.metrics.recall_score(TESTAREA_val, y_pred_TESTAREA_rf, average='macro')))
 # print("F1: " + str(sk.metrics.f1_score(TESTAREA_val, y_pred_TESTAREA_rf, average='macro')))
